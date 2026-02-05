@@ -28,3 +28,18 @@ export const getPaginatedProducts = async (
     hasMore,
   };
 };
+
+export const createProduct = async (productData: Partial<IProduct>): Promise<IProduct> => {
+  const product = await ProductModel.create(productData);
+  return product;
+};
+
+export const searchProducts = async (query: string): Promise<IProduct[]> => {
+  const products = await ProductModel.find({
+    $or: [
+      { name: { $regex: query, $options: 'i' } },
+      { description: { $regex: query, $options: 'i' } },
+    ],
+  }).sort({ createdAt: -1 });
+  return products;
+};
