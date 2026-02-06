@@ -23,3 +23,35 @@ export const fetchProducts = async (
 
   return response.json();
 };
+
+export const createProduct = async (
+  productData: Omit<IProduct, '_id' | 'createdAt'>
+): Promise<IProduct> => {
+  const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.PRODUCTS}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(productData),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to create product');
+  }
+
+  return response.json();
+};
+
+export const searchProducts = async (query: string): Promise<IProduct[]> => {
+  const response = await fetch(
+    `${API_BASE_URL}${API_ENDPOINTS.SEARCH_PRODUCTS}?q=${encodeURIComponent(
+      query
+    )}`
+  );
+
+  if (!response.ok) {
+    throw new Error('Failed to search products');
+  }
+
+  return response.json();
+};
