@@ -22,11 +22,16 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
     }
 };
 
-export const createProduct = async (req: Request, res: Response): Promise<void> => {
+export const createProduct = async (req: Request, res: Response): Promise<void| string>  => {
     try {
-        const product = await createProductService(req.body);
-        res.status(HttpStatus.CREATED).json(product);
+        const response = await createProductService(req.body);
+        if (typeof response === 'string') {
+            res.status(HttpStatus.BAD_REQUEST).json({ message: response });
+            return;
+        }
+        res.status(HttpStatus.CREATED).json(response);
     } catch (error) {
+        console.log(error);
         res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Failed to create product' });
     }
 };
@@ -38,9 +43,14 @@ export const searchProducts = async (req: Request, res: Response): Promise<void>
             res.status(HttpStatus.BAD_REQUEST).json({ message: 'Search query is required' });
             return;
         }
-        const products = await searchProductsService(q);
-        res.status(HttpStatus.OK).json(products);
+        const response = await searchProductsService(q);
+        if (typeof response === 'string') {
+            res.status(HttpStatus.BAD_REQUEST).json({ message: response });
+            return;
+        }
+        res.status(HttpStatus.OK).json(response);
     } catch (error) {
+        console.log(error);
         res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Failed to search products' });
     }
 };
