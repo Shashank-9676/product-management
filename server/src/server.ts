@@ -1,5 +1,6 @@
 import express from 'express';
 import mongoose from 'mongoose';
+import type { Request, Response } from 'express';
 import cors from 'cors';
 import productRoutes from './routes/product.routes.js';
 import { config } from './config/env.config.js';
@@ -12,7 +13,7 @@ app.use(express.json());
 // Routes
 app.use(productRoutes);
 
-app.get('/', (req, res) => {
+app.get('/', (req: Request, res : Response) => {
     res.send({ status: 'ok' });
 });
 const connectDB = async () => {

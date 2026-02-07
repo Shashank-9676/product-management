@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { fetchProducts, searchProducts } from '../services/product.api';
 import type { IProduct } from '../types/product.types';
 import type { IPaginatedResponse } from '../types/pagination.types';
@@ -16,7 +16,7 @@ export const useInfiniteProducts = (
     const [query, setQuery] = useState<string>('');
 
     const loadMore = async () => {
-        if (loading || !hasMore || query) return; // Disable load more during search
+        if (loading || !hasMore || query) return;
 
         setLoading(true);
         setError(null);
@@ -41,9 +41,6 @@ export const useInfiniteProducts = (
 
         try {
             if (!searchQuery.trim()) {
-                // Reset to initial state or re-fetch first page
-                // For simplicity, we can re-fetch or just use what we have if we cached it. 
-                // Better: Reset to fetch first page to be consistent.
                 const response = await fetchProducts();
                 setProducts(response.data);
                 setNextCursor(response.nextCursor);
@@ -62,9 +59,5 @@ export const useInfiniteProducts = (
         }
     }, []);
 
-    const addProduct = (newProduct: IProduct) => {
-        setProducts((prev) => [newProduct, ...prev]);
-    };
-
-    return { products, hasMore, loading, error, loadMore, handleSearch, addProduct };
+    return { products, hasMore, loading, error, loadMore, handleSearch };
 };

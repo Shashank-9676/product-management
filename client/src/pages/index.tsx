@@ -1,11 +1,12 @@
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import ProductList from '../components/ProductList';
 import SearchBar from '../components/SearchBar';
 import ProductForm from '../components/AddProductForm';
 import { useInfiniteProducts } from '../hooks/useInfiniteProducts';
+import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
 import { fetchProducts } from '../services/product.api';
 
 import type { IProduct } from '../types/product.types';
@@ -22,10 +23,16 @@ export default function Home({ initialData }: HomeProps) {
     loading,
     loadMore,
     handleSearch,
-    addProduct,
   } = useInfiniteProducts(initialData);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  useIntersectionObserver(loadMoreRef, () => {
+    if (hasMore && !loading) {
+      loadMore();
+    }
+  });
 
   return (
     <>
@@ -81,28 +88,12 @@ export default function Home({ initialData }: HomeProps) {
 
           <ProductList products={products} />
 
-          {loading && (
-            <div className="flex justify-center py-12">
+          {/* Sentry element for infinite scrolling */}
+          <div ref={loadMoreRef} className="h-10 w-full flex justify-center items-center mt-8">
+            {loading && (
               <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-purple-600"></div>
-            </div>
-          )}
-
-          {hasMore && !loading && (
-            <div className="flex justify-center mt-12 mb-8">
-              <button
-                onClick={loadMore}
-                className="group relative px-8 py-3 overflow-hidden rounded-full bg-white text-purple-600 shadow-md transition-all hover:shadow-lg hover:text-white border border-purple-100"
-              >
-                <span className="absolute inset-0 w-full h-full bg-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-out"></span>
-                <span className="relative font-semibold flex items-center">
-                  Load More Products
-                  <svg className="w-4 h-4 ml-2 transform group-hover:translate-y-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                  </svg>
-                </span>
-              </button>
-            </div>
-          )}
+            )}
+          </div>
 
           {!hasMore && products.length > 0 && (
             <div className="text-center py-12">
@@ -140,14 +131,6 @@ export default function Home({ initialData }: HomeProps) {
         <ProductForm
           onClose={() => setIsModalOpen(false)}
           onProductAdded={() => {
-            // Ideally we should refetch or add to list locally. 
-            // For now, we rely on refetching handled in loadMore or handleSearch, 
-            // but let's just trigger a search refresh or reload the page for simplicity if addProduct isn't fully integrated with infinite scroll state.
-            // Actually, I exposed addProduct in the hook.
-            // However, since we don't return the NEW product from the hook's addProduct function (it takes a product), we need the form to pass the created product.
-            // But the form calls the API directly.
-            // So we should pass a callback to the form that updates the list.
-            // I'll update handleSearch('') to refresh the list as a simple "refresh" mechanism, or just Reload.
             window.location.reload();
           }}
         />

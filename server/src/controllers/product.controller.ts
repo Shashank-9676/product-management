@@ -38,7 +38,7 @@ export const createProduct = async (req: Request, res: Response): Promise<void| 
 
 export const searchProducts = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { q } = req.query;
+        const { q = '' } = req.query;
         if (typeof q !== 'string') {
             res.status(HttpStatus.BAD_REQUEST).json({ message: 'Search query is required' });
             return;
